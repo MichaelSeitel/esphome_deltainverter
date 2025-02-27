@@ -16,7 +16,7 @@ namespace esphome
 
         static constexpr uint8_t LENGTHOFMESSAGE = 167;
 
-        bool DeltaInverterSensorBase::check_value(const std::string& value)
+        bool DeltaInverterSensorBase::check_value(const uint32_t& value)
         {
             return true;
         }
@@ -26,7 +26,7 @@ namespace esphome
             lastUpdate_ = millis();
         }
 
-        void DeltaInverterSensorBase::has_timed_out()
+        bool DeltaInverterSensorBase::has_timed_out()
         {
             auto now = millis();
             if(lastUpdate_ != 0 && now - lastUpdate_ > timeout_)
@@ -157,12 +157,12 @@ namespace esphome
 
         uint16_t DeltaInverter::calc_crc() 
         {
-            uint8_t *sop = buffer_[0];
-            uint8_t *eop = buffer_[length_ - 3];
+            uint8_t sop = buffer_[0];
+            uint8_t eop = buffer_[length_ - 3];
             uint16_t crc;
             uint8_t bit_count;
             uint8_t *char_ptr;
-            char_ptr = sop;
+            char_ptr = &sop;
             crc = 0x0000;                       //initialize to zero, not all 1's
             do {
                 crc ^= ((*char_ptr) & 0x00ff);      //make sure only 8-bits get modified
@@ -175,7 +175,7 @@ namespace esphome
                         crc >>= 1;
                     }
                 } while (bit_count++ < 7);        //for every bit
-            } while (char_ptr++ < eop);           //for every byte
+            } while (char_ptr++ < &eop);           //for every byte
             return crc;                         //return 16 bits of crc
         }
     } // namespace deltainverter

@@ -9,7 +9,6 @@
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
-#include "esphome/components/sensor/sensor.h"
 
 namespace esphome
 {
@@ -20,7 +19,7 @@ namespace esphome
             public:
                 virtual ~IDeltaInverterSensor() = default;
 
-                virtual void publish_val(const std::string& value) = 0;
+                virtual void publish_val(const uint32_t& value) = 0;
                 virtual void publish_invalid() = 0;
                 virtual bool has_timed_out() = 0;
                 virtual const uint8_t get_position() const = 0;
@@ -36,7 +35,7 @@ namespace esphome
             uint8_t length_;
             std::string delta_name_;
         protected:
-            bool check_value(const std::string& value);
+            bool check_value(const uint32_t& value);
 
             void reset_timeout_counter();
             bool has_timed_out() override;
@@ -65,7 +64,7 @@ namespace esphome
             using SearchFcn = void(DeltaInverter::*)();
             SearchFcn search_{nullptr};
 
-            std::map<std::string, IDeltaInverterSensor*> sensors_;
+            std::map<uint8_t, IDeltaInverterSensor*> sensors_;
             std::vector<TelegramTrigger*> telegramTriggers_;
         protected:
             void reset();
