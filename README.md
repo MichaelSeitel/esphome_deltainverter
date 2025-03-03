@@ -2,7 +2,7 @@
 
 This repository adds support for Delta(R) inverters via RS485 to [ESPHome](https://esphome.io).
 
-##Example deltainverter.yaml
+## Example deltainverter.yaml
 ```yaml
 esphome:
   name: "delta-inverter"
