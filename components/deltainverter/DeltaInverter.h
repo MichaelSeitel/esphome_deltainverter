@@ -30,10 +30,10 @@ namespace esphome
         {
         private:
             uint32_t lastUpdate_{0};    // in milliseconds
-            const uint32_t timeout_;    // in milliseconds
+            std::string delta_name_;
             uint8_t position_;
             uint8_t length_;
-            std::string delta_name_;
+            const uint32_t timeout_;    // in milliseconds
         protected:
             bool check_value(const uint32_t& value);
 
@@ -58,7 +58,7 @@ namespace esphome
         {
         private:
             /* data */
-            std::array<uint8_t, 150> buffer_;
+            std::array<uint8_t, 256> buffer_;
             uint16_t length_{0};    // used bytes in buffer_
 
             using SearchFcn = void(DeltaInverter::*)();
@@ -76,7 +76,7 @@ namespace esphome
             void parse_record();
             void end_of_telegram();
 
-            uint16_t calc_crc();
+            uint16_t calc_crc(unsigned char *, unsigned char *);
         public:
             DeltaInverter();
 

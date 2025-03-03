@@ -14,7 +14,7 @@ namespace esphome
         static const char* const TAG = "deltainverter_sensor";
 
         DeltaInverterSensor::DeltaInverterSensor(std::string delta_name, int position, int length, int timeoutMS) :
-            DeltaInverterSensorBase{obis_code, value_regex, timeout_ms}
+            DeltaInverterSensorBase{delta_name, position, length, timeoutMS}
         {}
 
         void DeltaInverterSensor::publish_val(const uint32_t& value)

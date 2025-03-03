@@ -13,7 +13,7 @@ deltainverter_ns = cg.esphome_ns.namespace("deltainverter")
 DeltaInverter = deltainverter_ns.class_("DeltaInverter", cg.Component, uart.UARTDevice)
 MULTI_CONF = True
 
-
+CONF_DELTAINVERTER_ID = "deltainverter_id"
 CONF_DELTA_NAME = "delta_name"
 CONF_POSITION = "position"
 CONF_LENGTH = "length"

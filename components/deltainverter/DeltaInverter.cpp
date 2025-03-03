@@ -57,7 +57,7 @@ namespace esphome
             while(available() > 0)
             {
                 /* code */
-                (this->search_)();
+                (this->*search_)();
             }
 
             for(auto& it: sensors_)
@@ -106,18 +106,26 @@ namespace esphome
         {
             if(length_ != LENGTHOFMESSAGE)
             {
-                ESP_LOGD(TAG, "invalid telegram length");
+                ESP_LOGD(TAG, "invalid telegram length: %i", length_);
+                end_of_telegram();
                 return;
             }
-            if(buffer_[0] != STX || buffer_[1] != ACK || buffer_[3] != 0xA0 || buffer_[length_] != ETX) {
+            if(buffer_[0] != STX || buffer_[1] != ACK || buffer_[3] != 0xA0 || buffer_[length_ - 1] != ETX) {
                 ESP_LOGD(TAG, "invalid telegram");
+                end_of_telegram();
                 return;
             }
             if(buffer_[4] == 0x60 && buffer_[5] == 0x01)
             {
-                if(calc_crc() != buffer_[length_ - 2] << 8 + buffer_[length_ - 1])
+                // crc check
+                unsigned char arr[length_];
+                for (int i = 0; i < length_; i++) {
+                    arr[i] = buffer_[i];
+                }
+                if(calc_crc(arr + 1, arr + length_ - 3) != arr[length_ - 2])
                 {
-                    ESP_LOGE(TAG, "CRC check failure: calc_crc: %i - bytes_crc: %i", calc_crc(), buffer_[length_ - 2] << 8 + buffer_[length_ - 1]);
+                    ESP_LOGE("deltainverter", "CRC check failure: calc_crc: %i - bytes_crc: %i", calc_crc(arr + 1, arr + length_ - 3), arr[length_ - 2]);
+                    end_of_telegram();
                     return;
                 }
                 // parse data
@@ -129,8 +137,8 @@ namespace esphome
                         it.second->publish_val(buffer_[it.first]);
                         break;
                     case 2:
-                        it.second->publish_val(uint16_t(buffer_[it.first] 
-                            | buffer_[it.first+1] << 8));
+                        it.second->publish_val(uint16_t(buffer_[it.first+1] 
+                            | buffer_[it.first] << 8));
                         break;
                     case 4:
                         it.second->publish_val(uint32_t(buffer_[it.first] << 24 
@@ -143,7 +151,7 @@ namespace esphome
                     }
                 }
             }
-            
+            end_of_telegram();
         }
 
         void DeltaInverter::end_of_telegram()
@@ -155,14 +163,12 @@ namespace esphome
             reset();
         }
 
-        uint16_t DeltaInverter::calc_crc() 
+        uint16_t DeltaInverter::calc_crc(unsigned char *sop, unsigned char *eop) 
         {
-            uint8_t sop = buffer_[0];
-            uint8_t eop = buffer_[length_ - 3];
             uint16_t crc;
             uint8_t bit_count;
             uint8_t *char_ptr;
-            char_ptr = &sop;
+            char_ptr = sop;
             crc = 0x0000;                       //initialize to zero, not all 1's
             do {
                 crc ^= ((*char_ptr) & 0x00ff);      //make sure only 8-bits get modified
@@ -175,7 +181,7 @@ namespace esphome
                         crc >>= 1;
                     }
                 } while (bit_count++ < 7);        //for every bit
-            } while (char_ptr++ < &eop);           //for every byte
+            } while (char_ptr++ < eop);           //for every byte
             return crc;                         //return 16 bits of crc
         }
     } // namespace deltainverter
