@@ -13,7 +13,7 @@ esp8266:
     version: recommended
 
 external_components:
-  - source: components
+  - source: github://MichaelSeitel/esphome_deltainverter
 
 wifi:
   ssid: !secret wifi_ssid
