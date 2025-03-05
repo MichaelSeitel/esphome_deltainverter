@@ -88,6 +88,11 @@ namespace esphome
             uint8_t* dest = &buffer_[length_++];
             (void)read_byte(dest);
 
+            // skip test for first 150 bytes
+            if(length_ < 150) {
+                return;
+            }
+
             if(*dest == ETX)
             {
                 parse_record();
